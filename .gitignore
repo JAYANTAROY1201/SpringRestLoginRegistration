@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 Skip to content
 
@@ -25,6 +26,8 @@ JDBCprograms/.gitignore
 f51c738 19 days ago
 @JAYANTAROY1201 JAYANTAROY1201 updated on 20/06/18
 43 lines (38 sloc) 484 Bytes
+=======
+>>>>>>> 5c0628bc4d1b55851a428f9290616166ab3b9e6f
 # Compiled source #
 ###################
 *.com
@@ -55,7 +58,11 @@ f51c738 19 days ago
 *.classpath
 *.project
 *.settings
+<<<<<<< HEAD
 
+=======
+*.metadata
+>>>>>>> 5c0628bc4d1b55851a428f9290616166ab3b9e6f
 
 # OS generated files #
 ######################
@@ -67,6 +74,7 @@ f51c738 19 days ago
 ehthumbs.db
 Thumbs.db
 /bin/
+<<<<<<< HEAD
 
     © 2018 GitHub, Inc.
     Terms
@@ -84,3 +92,6 @@ Thumbs.db
 
 Press h to open a hovercard with more details.
 
+=======
+RemoteSystemsTempFiles
+>>>>>>> 5c0628bc4d1b55851a428f9290616166ab3b9e6f
