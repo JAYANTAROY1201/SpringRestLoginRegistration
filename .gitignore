@@ -1,0 +1,86 @@
+
+Skip to content
+
+    Pull requests
+    Issues
+    Marketplace
+    Explore
+
+    @JAYANTAROY1201
+
+0
+0
+
+    0
+
+JAYANTAROY1201/JDBCprograms
+Code
+Issues 0
+Pull requests 0
+Projects 0
+Wiki
+Insights
+Settings
+JDBCprograms/.gitignore
+f51c738 19 days ago
+@JAYANTAROY1201 JAYANTAROY1201 updated on 20/06/18
+43 lines (38 sloc) 484 Bytes
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+*.classpath
+*.project
+*.settings
+
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+/bin/
+
+    © 2018 GitHub, Inc.
+    Terms
+    Privacy
+    Security
+    Status
+    Help
+
+    Contact GitHub
+    API
+    Training
+    Shop
+    Blog
+    About
+
+Press h to open a hovercard with more details.
+
