@@ -16,6 +16,7 @@ public class EmployeeBean {
 	private String userName;
 	private String mobile;
 	private String password;
+	private String activate;
 
 	public EmployeeBean() {
 	}
@@ -60,11 +61,19 @@ public class EmployeeBean {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	public String getActivate() {
+		return password;
+	}
+
+	public void setActivate(String activate) {
+		this.activate = activate;
+	}
 
 	@Override
 	public String toString() {
-		return "EmployeeBean [id=" + _id + ", email=" + email + ", userName=" + userName + ", mobile=" + mobile
-				+ ", password=" + password + "]";
+		return "EmployeeBean [_id=" + _id + ", email=" + email + ", userName=" + userName + ", mobile=" + mobile
+				+ ", password=" + password + ", activate=" + activate + "]";
 	}
+
 
 }

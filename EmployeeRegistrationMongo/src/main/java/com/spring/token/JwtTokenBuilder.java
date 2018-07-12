@@ -21,7 +21,7 @@ public class JwtTokenBuilder {
 	/**
 	 * Method to create token
 	 * @param emp
-	 * @return
+	 * @return JWT token
 	 */
 	public String createJWT(EmployeeBean emp) {
 		// The JWT signature algorithm we will be using to sign the token

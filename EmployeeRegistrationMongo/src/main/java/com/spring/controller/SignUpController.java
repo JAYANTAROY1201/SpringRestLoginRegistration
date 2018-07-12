@@ -1,5 +1,7 @@
 package com.spring.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,8 @@ import com.spring.service.EmpServiceImpl;
 import com.spring.token.JwtTokenBuilder;
 
 /**
- * purpose:Controller class to access login and logout 
+ * purpose:Controller class to access login and logout
+ * 
  * @author JAYANTA ROY
  * @version 1.0
  * @since 10/07/18
@@ -40,10 +43,18 @@ public class SignUpController {
 		} else {
 			logger.info("Employee registered with : {}", eb.getEmail());
 			String message = "Sign Up Successful";
+			JwtTokenBuilder jwt = new JwtTokenBuilder();
+			String currentJwt = jwt.createJWT(eb);
+			EmpServiceImpl.sendActivationLink(currentJwt, eb);
 			return new ResponseEntity<String>(message, HttpStatus.OK);
 		}
 	}
 
+	/**
+	 * This method is written to login in system
+	 * @param eb
+	 * @return response entity
+	 */
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public ResponseEntity<String> login(@RequestBody EmployeeBean eb) {
 		EmployeeBean emp = empService.login(eb.getEmail(), eb.getPassword());
@@ -62,4 +73,40 @@ public class SignUpController {
 		}
 	}
 
+	/**
+	 * this method is written to make account activated after successful sign in
+	 * @param hsr 
+	 * @return response entity
+	 */
+	@RequestMapping("/activateaccount")
+	public ResponseEntity<String> activateaccount(HttpServletRequest hsr) {
+		System.out.println(hsr.getQueryString());
+		String token = hsr.getQueryString();
+
+		if (empService.activate(token)) {
+			String messege = "Account activated successfully";
+			return new ResponseEntity<String>(messege, HttpStatus.OK);
+		} else {
+			String msg = "Account not activated";
+			return new ResponseEntity<String>(msg, HttpStatus.FORBIDDEN);
+		}
+	}
+
+	/**
+	 * This method is written to get forgotten password
+	 * @param eb
+	 * @return response entity
+	 */
+	@RequestMapping(value = "/forgetpassword", method = RequestMethod.POST)
+	public ResponseEntity<String> forgetPassword(@RequestBody EmployeeBean eb) {
+
+		if (empService.forgotPassword(eb.getEmail())) {
+			logger.info("Password sent to email");
+
+			return new ResponseEntity<String>("Password sent to email", HttpStatus.OK);
+
+		} else {
+			return new ResponseEntity<String>("Password not sent", HttpStatus.FORBIDDEN);
+		}
+	}
 }
