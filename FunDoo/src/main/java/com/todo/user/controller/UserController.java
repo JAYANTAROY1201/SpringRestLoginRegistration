@@ -1,5 +1,6 @@
 package com.todo.user.controller;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -10,8 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.todo.user.exception.AccountActivationException;
 import com.todo.user.exception.LoginException;
 import com.todo.user.exception.SignupException;
 import com.todo.user.model.User;
@@ -24,26 +27,28 @@ public class UserController {
 	public static final Logger logger = LoggerFactory.getLogger(UserController.class);
 	
 	@Autowired
-	UserServiceImpl empService= new UserServiceImpl();
+	UserServiceImpl userService= new UserServiceImpl();
 	
 	/**
+	 * Method to control signup service
 	 * @param eb
 	 * @return
 	 * @throws SignupException
+	 * @throws MessagingException 
 	 */
 	@RequestMapping(value = "/signUp", method = RequestMethod.POST)
-	public ResponseEntity<String> signUp(@RequestBody User eb) throws SignupException
+	public ResponseEntity<String> signUp(@RequestBody User eb) throws SignupException, MessagingException
 	{
-		empService.signUp(eb);
+		userService.doSignUp(eb);
 		logger.info("Employee registered with : {}", eb.getEmail());
 		String message = "Sign Up Successful";
 		JwtTokenBuilder jwt = new JwtTokenBuilder();
 		String currentJwt = jwt.createJWT(eb);
-		UserServiceImpl.sendActivationLink(currentJwt, eb);
+		userService.sendActivationLink(currentJwt, eb);
+		logger.info("Activation link sent to email");
 		return new ResponseEntity<String>(message, HttpStatus.OK);
 	}
 	
-
 
 	
 	/**
@@ -52,14 +57,10 @@ public class UserController {
 	 * @throws LoginException
 	 */
 	@RequestMapping(value = "/logIn", method = RequestMethod.POST)
-	public ResponseEntity<String> logIn(@RequestBody User emp) throws LoginException {
-	empService.logIn(emp.getEmail(), emp.getPassword());
-	JwtTokenBuilder jwt = new JwtTokenBuilder();
-	String currentJwt = jwt.createJWT(emp);
-	jwt.parseJWT(currentJwt);
-	String message = "Hello, " + emp.getUserName() + " Id:- " + emp.get_id() + " Email:- " + emp.getEmail()
-			+ " Phone Number:- " + emp.getMobile() + "YOUR JWT TOKEN IS:" + currentJwt;
-	return new ResponseEntity<String>(message, HttpStatus.OK);
+	public ResponseEntity<String> logIn(@RequestParam String email,@RequestParam String password) throws LoginException {
+	userService.doLogIn(email, password);
+		
+	return new ResponseEntity<String>("login successful:\n", HttpStatus.OK);
 	}
 
 	
@@ -67,36 +68,46 @@ public class UserController {
 	 * this method is written to make account activated after successful sign in
 	 * @param hsr 
 	 * @return response entity
+	 * @throws AccountActivationException 
 	 */
-	@RequestMapping("/activateaccount")
-	public ResponseEntity<String> activateaccount(HttpServletRequest hsr) {
-		System.out.println(hsr.getQueryString());
+	@RequestMapping(value="/activateaccount",method = RequestMethod.GET)
+	public ResponseEntity<String> activateAccount(HttpServletRequest hsr) throws AccountActivationException {
 		String token = hsr.getQueryString();
-
-		if (empService.activate(token)) {
+	        userService.doActivateEmail(token) ;
 			String message = "Account activated successfully";
-			return new ResponseEntity<String>(message, HttpStatus.OK);
-		} else {
-			String msg = "Account not activated";
-			return new ResponseEntity<String>(msg, HttpStatus.FORBIDDEN);
-		}
+			logger.info(message);
+			return new ResponseEntity<String>(message, HttpStatus.OK);	
 	}
 
 	/**
 	 * This method is written to get forgotten password
 	 * @param eb
 	 * @return response entity
+	 * @throws LoginException 
+	 * @throws MessagingException 
 	 */
 	@RequestMapping(value = "/forgetpassword", method = RequestMethod.POST)
-	public ResponseEntity<String> forgetPassword(@RequestBody User eb) {
+	public ResponseEntity<String> forgetPassword(@RequestParam String email) throws LoginException, MessagingException {
 
-		if (empService.forgotPassword(eb.getEmail())) {
-			logger.info("Password sent to email");
-
-			return new ResponseEntity<String>("Password sent to email", HttpStatus.OK);
-
-		} else {
-			return new ResponseEntity<String>("Password not sent", HttpStatus.FORBIDDEN);
-		}
+		    userService.doSendNewPasswordLink(email);
+			logger.info("New password reset link sent to email");
+			return new ResponseEntity<String>("Password sent to email", HttpStatus.OK);	
 	}
+	
+	/**
+	 * This method is written to get forgotten password
+	 * @param eb
+	 * @return response entity
+	 * @throws LoginException 
+	 */
+	@RequestMapping(value = "/resetpassword", method = RequestMethod.POST)
+	public ResponseEntity<String> resetPassword(@RequestBody User user,HttpServletRequest hsr)
+	
+	{
+		    String jwtToken=hsr.getQueryString();
+		    userService.doResetPassword(jwtToken, user.getPassword());
+			logger.info("New password set successfully");
+			return new ResponseEntity<String>("New password set successfully", HttpStatus.OK);	
+	}
+	
 }
