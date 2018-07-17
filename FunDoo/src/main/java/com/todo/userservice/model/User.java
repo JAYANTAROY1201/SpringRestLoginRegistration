@@ -1,8 +1,10 @@
-package com.todo.user.model;
+package com.todo.userservice.model;
 
 import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * purpose: 
@@ -19,6 +21,7 @@ public class User implements Serializable {
 	private String email;
 	private String mobile;
 	private String password;
+	@ApiModelProperty(hidden = true)
 	private String activation;
 	
 	public User() {}
@@ -97,7 +100,7 @@ public class User implements Serializable {
 		this.activation = activation;
 	}
 	
-	/* (non-Javadoc)
+	/** (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

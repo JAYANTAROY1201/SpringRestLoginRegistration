@@ -1,8 +1,6 @@
-package com.todo.user.dao;
+package com.todo.userservice.dao;
 
 import javax.mail.MessagingException;
-
-import com.todo.user.model.Mail;
 
 /**
  * purpose: Sending mail
@@ -10,11 +8,14 @@ import com.todo.user.model.Mail;
  * @version 1.0
  * @since 16/07/18
  */
+
 public interface MailService {
 	/**
 	 * This method will send mail
 	 * @param mail
 	 * @throws MessagingException
 	 */
-	public void sendMail(Mail mail) throws MessagingException;
+	public void sendMail(String to,String subject,String body) throws MessagingException;
+	//public void sendEmail()
+	
 }

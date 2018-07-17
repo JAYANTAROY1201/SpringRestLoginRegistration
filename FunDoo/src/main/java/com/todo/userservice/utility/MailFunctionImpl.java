@@ -1,4 +1,4 @@
-package com.todo.user.services;
+package com.todo.userservice.utility;
 
 
 import javax.mail.MessagingException;
@@ -9,8 +9,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
-import com.todo.user.dao.MailService;
-import com.todo.user.model.Mail;
+import com.todo.userservice.dao.MailService;
+
 
 
 /**
@@ -20,23 +20,23 @@ import com.todo.user.model.Mail;
  * @since 10/07/18
  */
 @Component
-public class MailServiceImpl implements MailService{
+public class MailFunctionImpl implements MailService{
 
 	@Autowired
 	private JavaMailSender javaMailSender;
 	
 	/** (non-Javadoc)
-	 * @see com.todo.user.dao.MailService#sendMail(com.todo.user.model.Mail)
+	 * @see com.todo.userservice.dao.MailService#sendMail(com.todo.userservice.model.Mail)
 	 */
 	@Override
-	public void sendMail(Mail mail) throws MessagingException {
+	public void sendMail(String to,String subject,String body) throws MessagingException {
 		
 		MimeMessage message = javaMailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message);
 		
-		helper.setSubject(mail.getSubject());
-		helper.setTo(mail.getTo());
-		helper.setText(mail.getBody());
+		helper.setSubject(subject);
+		helper.setTo(to);
+		helper.setText(body);
 		
 		javaMailSender.send(message);
 	}

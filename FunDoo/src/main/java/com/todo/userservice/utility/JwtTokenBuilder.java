@@ -1,10 +1,10 @@
-package com.todo.user.utility;
+package com.todo.userservice.utility;
 
 import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
 
-import com.todo.user.model.User;
+import com.todo.userservice.model.User;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
@@ -39,14 +39,11 @@ public class JwtTokenBuilder {
 	 * 
 	 * @param jwt
 	 */
-	public void parseJWT(String jwt) {
+	public static Claims parseJWT(String jwt) {
 
 		// This line will throw an exception if it is not a signed JWS (as expected)
-		Claims claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(KEY)).parseClaimsJws(jwt)
+		return Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(KEY)).parseClaimsJws(jwt)
 				.getBody();
-		System.out.println("ID: " + claims.getId());
-		System.out.println("Subject: " + claims.getSubject());
-		System.out.println("Issuer: " + claims.getIssuer());
-		System.out.println("Expiration: " + claims.getExpiration());
+		
 	}
 }

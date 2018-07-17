@@ -1,24 +1,21 @@
-package com.todo.user.services;
+package com.todo.userservice.services;
 
 import java.util.Optional;
 import javax.mail.MessagingException;
-import javax.xml.bind.DatatypeConverter;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.todo.user.dao.GeneralMongoRepository;
-import com.todo.user.dao.MailService;
-import com.todo.user.exception.AccountActivationException;
-import com.todo.user.exception.LoginException;
-import com.todo.user.exception.SignupException;
-import com.todo.user.model.Mail;
-import com.todo.user.model.User;
-import com.todo.user.utility.JwtTokenBuilder;
+import com.todo.exception.AccountActivationException;
+import com.todo.exception.LoginException;
+import com.todo.exception.SignupException;
+import com.todo.userservice.dao.GeneralMongoRepository;
+import com.todo.userservice.dao.MailService;
+import com.todo.userservice.model.User;
+import com.todo.userservice.utility.JwtTokenBuilder;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 
 /**
  * purpose: Implementation of user service
@@ -34,29 +31,29 @@ public class UserServiceImpl {
 	@Autowired
 	PasswordEncoder passwordencoder;
 	@Autowired
-	Mail mail;
-	@Autowired
 	MailService mailService;
+	@Value("${hostandport}")
+	String host;
 
 	/**
 	 * This method is add functionality for sign up
 	 * 
-	 * @param emp
+	 * @param user
 	 * @return true if sign up successful else false
 	 * @throws SignupException
 	 */
-	public void doSignUp(User emp) throws SignupException {
-		if (emp.getEmail().equals("")) {
+	public void doSignUp(User user) throws SignupException {
+		if (user.getEmail().equals("")) {
 			throw new SignupException("Email is null");
 		} else {
-			Optional<User> user = gm.findByEmail(emp.getEmail());
-			if (user.isPresent()) {
+			Optional<User> userOp = gm.findByEmail(user.getEmail());
+			if (userOp.isPresent()) {
 				throw new SignupException("Email already exist");
 			} else {
 
-				emp.setPassword(passwordencoder.encode(emp.getPassword()));
-
-				gm.save(emp);
+				user.setPassword(passwordencoder.encode(user.getPassword()));
+                user.setActivation("false");
+				gm.save(user);
 			}
 		}
 	}
@@ -69,7 +66,7 @@ public class UserServiceImpl {
 	 * @return
 	 * @throws LoginException
 	 */
-	public void doLogIn(String email, String password) throws LoginException {
+	public String doLogIn(String email, String password) throws LoginException {
 		if (email.equals("")) {
 			throw new LoginException("Email can't be null");
 		}
@@ -88,6 +85,10 @@ public class UserServiceImpl {
 			User user = new User();
 			user = gm.findByEmail(email).get();
 			user.toString();
+			JwtTokenBuilder jwt=new JwtTokenBuilder();
+			return jwt.createJWT(user);
+			 
+			
 
 		}
 
@@ -100,24 +101,22 @@ public class UserServiceImpl {
 	 * @param emp
 	 * @throws MessagingException 
 	 */
-	public void sendActivationLink(String jwToken, User emp) throws MessagingException {
+	public void sendActivationLink(String to,String jwt) throws MessagingException {
 		
-		mail.setTo(emp.getEmail());
-		mail.setSubject("Email Activation mail");
-		mail.setBody("Click here to activate your account:\n\n" + "http://192.168.0.36:8080/fundoo/activateaccount/?"
-				+ jwToken);
-		mailService.sendMail(mail);
+		String body = "Click here to activate your account:\n\n" + host+"/fundoo/user/activateaccount/?"+jwt;
+		mailService.sendMail(to,"Email Activation Link",body);
 	}
-
+//public void sendActiveLink(String to,String subject,String body)
+//{
+//	
+//}
 	/**
 	 * This method is written to activate the account
 	 * @param jwt
 	 * @throws AccountActivationException
 	 */
 	public void doActivateEmail(String jwt) throws AccountActivationException {
-		Claims claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary("JAYANTA")).parseClaimsJws(jwt)
-				.getBody();
-
+		Claims claims = JwtTokenBuilder.parseJWT(jwt);
 		if (gm.findById(claims.getId()).isPresent() == false) {
 			throw new AccountActivationException("Account not get activated");
 		} else {
@@ -141,11 +140,9 @@ public class UserServiceImpl {
 		if (gm.findByEmail(email).isPresent() == false) {
 			throw new LoginException("Email not exist");
 		}	
-	    mail.setTo(email);
-		mail.setSubject("Password reset mail");
-		mail.setBody("Copy the below link to postman and reset your password:\n\n"
-				+ "192.168.0.36:8080/fundoo/resetpassword/?" + jb.createJWT(gm.findByEmail(email).get()));
-		mailService.sendMail(mail);
+		String body="Copy the below link to postman and reset your password:\n\n"
+				+ host+"/fundoo/user/resetpassword/?" + jb.createJWT(gm.findByEmail(email).get());
+		mailService.sendMail(email,"Password reset mail",body);
 	}
 
 	/**
@@ -154,8 +151,7 @@ public class UserServiceImpl {
 	 * @param newPassword
 	 */
 	public void doResetPassword(String jwtToken, String newPassword) {
-		Claims claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary("JAYANTA"))
-				.parseClaimsJws(jwtToken).getBody();
+		Claims claims = JwtTokenBuilder.parseJWT(jwtToken);
 		Optional<User> user = gm.findById(claims.getId());
 		user.get().setPassword(passwordencoder.encode(newPassword));
 		gm.save(user.get());

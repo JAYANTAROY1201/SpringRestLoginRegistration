@@ -1,4 +1,4 @@
-package com.todo.user.exception;
+package com.todo.exception;
 
 /**
  * purpose:To handle the exception that occurs during signup

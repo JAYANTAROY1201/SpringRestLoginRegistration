@@ -1,4 +1,4 @@
-package com.todo.user.model;
+package com.todo.userservice.model;
 
 import java.io.Serializable;
 

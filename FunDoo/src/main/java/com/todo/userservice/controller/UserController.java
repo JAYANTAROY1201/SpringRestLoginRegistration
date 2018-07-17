@@ -1,7 +1,8 @@
-package com.todo.user.controller;
+ package com.todo.userservice.controller;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,15 +15,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.todo.user.exception.AccountActivationException;
-import com.todo.user.exception.LoginException;
-import com.todo.user.exception.SignupException;
-import com.todo.user.model.User;
-import com.todo.user.services.UserServiceImpl;
-import com.todo.user.utility.JwtTokenBuilder;
+import com.todo.exception.AccountActivationException;
+import com.todo.exception.LoginException;
+import com.todo.exception.SignupException;
+import com.todo.userservice.model.User;
+import com.todo.userservice.services.UserServiceImpl;
+import com.todo.userservice.utility.JwtTokenBuilder;
 
 @RestController
-@RequestMapping("/fundoo")
+@RequestMapping("/fundoo/user")
 public class UserController {
 	public static final Logger logger = LoggerFactory.getLogger(UserController.class);
 	
@@ -31,20 +32,19 @@ public class UserController {
 	
 	/**
 	 * Method to control signup service
-	 * @param eb
+	 * @param user
 	 * @return
 	 * @throws SignupException
 	 * @throws MessagingException 
 	 */
-	@RequestMapping(value = "/signUp", method = RequestMethod.POST)
-	public ResponseEntity<String> signUp(@RequestBody User eb) throws SignupException, MessagingException
+	@RequestMapping(value = "/signup", method = RequestMethod.POST)
+	public ResponseEntity<String> signUp(@RequestBody User user) throws SignupException, MessagingException
 	{
-		userService.doSignUp(eb);
-		logger.info("Employee registered with : {}", eb.getEmail());
+		userService.doSignUp(user);
+		logger.info("Employee registered with : {}", user.getEmail());
 		String message = "Sign Up Successful";
-		JwtTokenBuilder jwt = new JwtTokenBuilder();
-		String currentJwt = jwt.createJWT(eb);
-		userService.sendActivationLink(currentJwt, eb);
+		JwtTokenBuilder jwt = new JwtTokenBuilder();	
+		userService.sendActivationLink(user.getEmail(),jwt.createJWT(user));
 		logger.info("Activation link sent to email");
 		return new ResponseEntity<String>(message, HttpStatus.OK);
 	}
@@ -56,10 +56,10 @@ public class UserController {
 	 * @return
 	 * @throws LoginException
 	 */
-	@RequestMapping(value = "/logIn", method = RequestMethod.POST)
-	public ResponseEntity<String> logIn(@RequestParam String email,@RequestParam String password) throws LoginException {
-	userService.doLogIn(email, password);
-		
+	@RequestMapping(value = "/login", method = RequestMethod.POST)
+	public ResponseEntity<String> logIn(@RequestParam String email,@RequestParam String password,HttpServletResponse hsr) throws LoginException {
+	String LoginJwt=userService.doLogIn(email, password);
+    hsr.setHeader("jwt", LoginJwt);
 	return new ResponseEntity<String>("login successful:\n", HttpStatus.OK);
 	}
 

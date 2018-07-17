@@ -1,4 +1,4 @@
-package com.todo.user.globalexception;
+package com.todo.globalexception;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -9,10 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.todo.user.exception.AccountActivationException;
-import com.todo.user.exception.LoginException;
-import com.todo.user.exception.SignupException;
-import com.todo.user.model.ResponseBean;
+import com.todo.exception.AccountActivationException;
+import com.todo.exception.LoginException;
+import com.todo.exception.NoteReaderException;
+import com.todo.exception.SignupException;
+import com.todo.userservice.model.ResponseBean;
 
 /**
  * purpose: 
@@ -52,11 +53,29 @@ public ResponseEntity<ResponseBean> loginExceptionHandler(LoginException excepti
 	return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 }
 
+/**
+ * @param exception
+ * @param request
+ * @return
+ */
 @ExceptionHandler(AccountActivationException.class)
 public ResponseEntity<ResponseBean> activationExceptionHandler(AccountActivationException exception, HttpServletRequest request) {
 	logger.info("Exception encountered at " + request.getRequestURI() + ":  "+ exception.getMessage());
 	response.setMessage(exception.getMessage());
 	response.setStatus(-3);
+	return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); 
+}
+
+/**
+ * @param exception
+ * @param request
+ * @return
+ */
+@ExceptionHandler(NoteReaderException.class)
+public ResponseEntity<ResponseBean> noteReaderExceptionHandler(NoteReaderException exception, HttpServletRequest request) {
+	logger.info("Exception encountered at " + request.getRequestURI() + ":  "+ exception.getMessage());
+	response.setMessage(exception.getMessage());
+	response.setStatus(-4);
 	return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST); 
 }
 }
